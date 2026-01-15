@@ -19,3 +19,6 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## pingcode API文档
 参考文档: [api](docs/reference/openpingcode/Readme.md)
+
+## 迭代原则
+敏捷迭代的核心原则是持续交付有价值的、可工作的软件，通过短周期迭代（如 Sprint 冲刺）来快速响应变化，强调客户满意度、跨职能团队协作（业务与开发每日沟通）、频繁交付、持续改进，以及重视个人互动和可工作软件胜过流程和文档。 

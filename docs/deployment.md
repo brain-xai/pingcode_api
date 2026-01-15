@@ -27,21 +27,27 @@
 
 ---
 
-## 2. 目录与模块规范
+## 2. 目录、包结构与数据模型规范
 
-> 下面描述的是与部署/构建强相关的目录与模块约定，而不是完整项目结构。
+> 本章节是整个 SDK 技术实现的“骨架规范”，定义包结构和数据结构的唯一来源。任何实现都必须严格遵守本节约定。
+
+### 2.1 顶层模块与目录
 
 - 根模块：`github.com/brain-xai/pingcode_api`
   - 不允许再创建第二个 Go module，避免多模块构建混乱。
-- SDK 相关目录（建议）：
+
+- 顶层目录：
   - `sdk/`：对外暴露的 SDK 入口与各 Service 实现
     - `sdk/client.go`：Client 定义与初始化逻辑
     - `sdk/config.go`：Config 定义与默认值
-    - `sdk/auth/`、`sdk/project/`、`sdk/ship/`、`sdk/testhub/`、`sdk/wiki/` …
-  - `internal/`：仅供 SDK 内部使用的工具
+    - `sdk/errors.go`：SDK 统一错误类型和映射
+    - `sdk/model/`：所有对外可见的业务数据结构（统一数据结构树）
+    - `sdk/service/`：各领域的 Service（API 调用逻辑）
+  - `internal/`：仅供 SDK 内部使用的工具和 API 映射层
+    - `internal/api/`：与 OpenAPI 一一对应的原始 DTO（通常由工具生成）
     - `internal/httpclient/`：HTTP 封装、重试、日志、metrics Hook
-    - `internal/errors/`：错误类型定义与映射
     - `internal/encoding/`：JSON 编解码、时间格式等
+    - `internal/errors/`：内部错误定义与转换
   - `cmd/`（可选）：与 SDK 相关的命令行工具，如 SDK 生成器或调试工具
   - `examples/`：示例代码，必须可编译运行
 
@@ -51,6 +57,84 @@
 - 对外导出的类型与函数只能位于：
   - `sdk/` 及其子目录
   - `cmd/` 下仅用于可执行程序，不对外形成稳定 API。
+
+### 2.2 sdk/model：统一对外数据结构树
+
+- 所有对 SDK 使用者可见的业务数据结构必须放在 `sdk/model` 目录树下，禁止在 service 或其它目录随意新增对外结构体。
+- 统一结构：
+
+  - `sdk/model/core/`：跨领域复用的基础类型
+    - 各种 ID 类型：`ProjectID`、`IssueID`、`UserID` 等
+    - 分页结构：`Pagination`、`PageRequest` 等
+    - 通用时间、状态和枚举类型
+
+  - `sdk/model/auth/`：认证领域模型
+  - `sdk/model/project/`：项目领域模型
+  - `sdk/model/ship/`：产品/需求领域模型
+  - `sdk/model/testhub/`：测试领域模型
+  - `sdk/model/wiki/`：知识库领域模型
+  - `sdk/model/devops/`：DevOps 领域模型
+  - `sdk/model/global/`：全局配置与跨模块通用模型
+
+约束：
+
+- 只有真正跨多个模块的基础类型才放入 `sdk/model/core`，避免成为“垃圾场”。
+- 一旦某个 model 类型被用于对外 API 的入参或返回值，即视为公共 API 的一部分，需遵守语义化版本管理与向后兼容规则（见第 6 章）。
+
+### 2.3 sdk/service：按领域划分的 Service 层
+
+- 结构：
+
+  - `sdk/service/auth/`
+  - `sdk/service/project/`
+  - `sdk/service/ship/`
+  - `sdk/service/testhub/`
+  - `sdk/service/wiki/`
+  - `sdk/service/devops/`
+  - `sdk/service/global/`
+
+- 规范：
+
+  - Service 层只负责“如何调用 API”：HTTP 方法、URL 路径、分页与重试策略等。
+  - Service 对外暴露的入参与返回值类型必须全部来自 `sdk/model/...`，禁止直接暴露 `internal/api` 类型。
+  - Service 中不得使用 `map[string]interface{}` 作为对外请求参数类型，必须使用明确的 Filter/Input 结构体，这些结构体放在对应的 `sdk/model` 包中。
+  - Service 方法必须使用 `context.Context` 控制生命周期，禁止无 context 的网络调用。
+
+### 2.4 internal/api：OpenAPI 映射层
+
+- 结构：
+
+  - `internal/api/auth/`
+  - `internal/api/project/`
+  - `internal/api/ship/`
+  - `internal/api/testhub/`
+  - `internal/api/wiki/`
+  - `internal/api/devops/`
+  - `internal/api/global/`
+
+- 职责：
+
+  - 与 PingCode OpenAPI 文档保持尽可能一一对应的 DTO 定义：字段名、JSON 标签等紧跟文档。
+  - 可以通过代码生成工具从 OpenAPI 描述生成，禁止手动调整生成后的代码逻辑（仅允许在模板或上游描述中修改）。
+
+- 约束：
+
+  - `internal/api` 仅供 SDK 内部使用，绝不能从 `sdk/` 包直接导出或被使用方依赖。
+  - 当 OpenAPI 文档发生变更时，优先修改 `internal/api` 生成逻辑和 model/api 的映射关系，不直接对外暴力修改 `sdk/model` 结构，从而减少对使用者的破坏。
+
+### 2.5 model 与 internal/api 的映射规范
+
+- 所有对外暴露的 `sdk/model` 类型与 `internal/api` 类型之间必须有清晰的转换关系：
+
+  - 输入（调用方 → SDK）：`sdk/model` → `internal/api` → HTTP JSON
+  - 输出（服务端 → SDK）：HTTP JSON → `internal/api` → `sdk/model`
+
+- 转换逻辑：
+
+  - 建议在各 `sdk/service` 包内或单独的 `mapper` 文件中实现，禁止在随机位置散落转换代码。
+  - 禁止在转换过程中静默吞掉字段或错误，所有丢弃/默认行为必须在代码中可见并可审计。
+
+该映射规范是保证“OpenAPI 可以演进，而 SDK 使用者不被轻易破坏”的关键机制。
 
 ---
 
@@ -291,3 +375,77 @@ SDK 的配置结构 `Config` 是部署行为的核心入口，规范如下：
   - 初始化 Client；
   - 调用真实 API；
   - 处理错误与结果。
+
+---
+
+## 11. 命名规范
+
+本章节统一约束 SDK 的命名风格，避免出现“同一概念多种命名”的混乱情况。所有新代码必须遵守本节约定，旧代码逐步收敛。
+
+### 11.1 包命名
+
+- 包名一律使用小写，禁止下划线和驼峰，例如：`project`、`testhub`、`httpclient`。
+- 业务领域包名直接使用领域名：
+  - `sdk/model/project`、`sdk/service/project`、`internal/api/project` 等。
+- 缩写统一：
+  - `DevOps` 统一为 `devops`；
+  - `TestHub` 统一为 `testhub`；
+  - 不允许同一概念出现多种大小写变体（例如 `testHub`、`testHubService` 这类写法视为错误）。
+
+### 11.2 类型、结构体与接口命名
+
+- 所有导出类型首字母大写，使用驼峰命名：`Project`、`TestCase`、`WikiPage`。
+- 结构体命名必须体现含义，不使用无信息缩写：
+  - 实体：`Project`、`Requirement`、`TestPlan` 等；
+  - 输入：`ProjectCreateInput`、`ProjectUpdateInput`；
+  - 过滤：`ProjectFilter`、`TestCaseFilter`；
+  - 响应包装（如有需要）：`ListProjectsResult`。
+- 接口命名：
+  - 行为接口使用 `er` 结尾或领域名：`Logger`、`HTTPClient`、`AuthProvider`；
+  - Service 类型统一命名为 `Service`，放在对应的 `sdk/service/<domain>` 包，例如 `type Service struct { ... }`，通过包名区分领域。
+- ID 类型：
+  - 使用 `XXXID` 形式，例如：`ProjectID`、`IssueID`、`UserID`；
+  - 这些类型统一放在 `sdk/model/core` 中，避免各处重复定义。
+
+### 11.3 函数与方法命名
+
+- 对外导出方法使用动词开头、语义清晰的驼峰命名：
+  - 查询：`GetProject`、`ListProjects`、`GetTestCase`；
+  - 创建：`CreateProject`、`CreateRequirement`；
+  - 更新：`UpdateProject`、`UpdateTestPlan`；
+  - 删除/归档：`DeleteProject`、`ArchiveRequirement`。
+- 同一领域内相同语义必须使用相同动词：
+  - 获取单个资源统一用 `Get`，禁止混用 `Fetch` / `Find` / `Load`；
+  - 创建统一用 `Create`，禁止某些地方用 `New` 表示远端创建。
+- Service 方法签名必须包含 `context.Context` 作为第一个参数：
+  - `func (s *Service) GetProject(ctx context.Context, id core.ProjectID) ...`
+
+### 11.4 变量与参数命名
+
+- 变量和参数使用小驼峰命名，尽量短而不失语义：`projectID`、`userID`、`filter`、`ctx`。
+- 上下文变量统一命名为 `ctx`，不要使用 `c`、`context` 等其他形式。
+- 避免无信息命名：`data`、`info`、`res` 等仅在非常局部、含义明确的情况下使用，禁止在对外 API 中出现这类名称。
+
+### 11.5 错误与常量命名
+
+- 错误变量：
+  - 使用 `errXxx` 形式，例如：`errInvalidConfig`、`errUnauthorized`；
+  - 对外可见的错误类型统一集中在 `sdk/errors.go` 或 `sdk/model/core`，避免各处散落。
+- 常量：
+  - 使用大写 + 下划线：`DefaultTimeout` 这类导出常量可以使用驼峰；
+  - 仅当确实需要暴露给使用者时才导出常量，否则保持在内部包。
+
+### 11.6 缩写与专有名词
+
+- 通用缩写遵循 Go 官方惯例：
+  - `ID`、`URL`、`HTTP` 等缩写整体视为一个单词：`ProjectID`、`BaseURL`、`HTTPClient`；
+  - 不允许出现 `ProjectId`、`HttpClient` 这类大小写错误。
+- PingCode 领域内的专有名词，需要在首次使用处固定写法，并在后续保持一致，例如：
+  - `TestHub` → 包名 `testhub`，类型名 `TestHubConfig`（如确有需要）。
+
+### 11.7 命名冲突与演进
+
+- 若 OpenAPI 中的命名与现有 SDK 命名冲突：
+  - 以 SDK 对外命名为准，通过 `internal/api` 映射层做适配；
+  - 禁止为了“对齐 OpenAPI”而直接破坏已有 SDK 的公开命名（违反向后兼容）。
+- 新增 API 或模型时，应优先复用现有命名模式；如果必须引入新概念，先在本章节补充命名约定再落地实现。
