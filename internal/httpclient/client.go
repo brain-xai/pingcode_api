@@ -62,6 +62,28 @@ func (c *Client) Post(ctx context.Context, path string, query url.Values, body, 
 	return c.doRequest(ctx, http.MethodPost, path, query, body, result)
 }
 
+// buildPath 构建带路径参数的 URL（内部方法）
+func (c *Client) buildPath(pathTemplate string, pathParams map[string]string) (string, error) {
+	path := pathTemplate
+	for key, value := range pathParams {
+		placeholder := "{" + key + "}"
+		if !strings.Contains(path, placeholder) {
+			return "", fmt.Errorf("path placeholder %s not found in template %s", placeholder, pathTemplate)
+		}
+		path = strings.ReplaceAll(path, placeholder, url.PathEscape(value))
+	}
+	return path, nil
+}
+
+// GetWithPathParams 发送带路径参数的 GET 请求
+func (c *Client) GetWithPathParams(ctx context.Context, pathTemplate string, pathParams map[string]string, query url.Values, result interface{}) error {
+	path, err := c.buildPath(pathTemplate, pathParams)
+	if err != nil {
+		return err
+	}
+	return c.Get(ctx, path, query, result)
+}
+
 // doRequest 发送 HTTP 请求（内部方法）
 func (c *Client) doRequest(ctx context.Context, method, path string, query url.Values, body, result interface{}) error {
 	// 构建完整 URL

@@ -7,6 +7,7 @@ import (
 
 	"github.com/brain-xai/pingcode_api/internal/httpclient"
 	"github.com/brain-xai/pingcode_api/sdk/service/auth"
+	"github.com/brain-xai/pingcode_api/sdk/service/global"
 	"github.com/brain-xai/pingcode_api/sdk/service/project"
 )
 
@@ -16,7 +17,9 @@ type Client struct {
 	http      *httpclient.Client
 	auth      *auth.Service
 	project   *project.Service
+	global    *global.Service
 	projectMu sync.RWMutex
+	globalMu  sync.RWMutex
 }
 
 // NewClient 创建新的 SDK 客户端
@@ -79,6 +82,18 @@ func (c *Client) Project() *project.Service {
 	}
 
 	return c.project
+}
+
+// Global 返回全局服务（懒加载）
+func (c *Client) Global() *global.Service {
+	c.globalMu.Lock()
+	defer c.globalMu.Unlock()
+
+	if c.global == nil {
+		c.global = global.NewService(c.http, c.config.BaseURL)
+	}
+
+	return c.global
 }
 
 const defaultTimeout = 30

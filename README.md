@@ -109,12 +109,66 @@ export PINGCODE_CLIENT_SECRET=your_client_secret
 go run main.go
 ```
 
+### 获取项目详情
+
+```go
+project, err := client.Project().Get(ctx, "project-id")
+if err != nil {
+    log.Fatal(err)
+}
+log.Printf("项目: %s (%s)", project.Name, project.Identifier)
+if project.Assignee != nil {
+    log.Printf("负责人: %s", project.Assignee.DisplayName)
+}
+```
+
+### 获取当前用户信息
+
+```go
+user, err := client.Global().GetCurrentUser(ctx)
+if err != nil {
+    log.Fatal(err)
+}
+log.Printf("当前用户: %s (%s)", user.DisplayName, user.Email)
+```
+
+### 获取企业成员列表
+
+```go
+users, _, err := client.Global().ListUsers(ctx, global.UserFilter{
+    Keywords: "john",
+})
+for _, user := range users {
+    log.Printf("- %s (%s)", user.DisplayName, user.Email)
+}
+```
+
+### 获取项目成员列表
+
+```go
+members, _, err := client.Project().ListMembers(ctx, projectID)
+for _, member := range members {
+    if member.Type == "user" && member.User != nil {
+        log.Printf("- 用户: %s", member.User.DisplayName)
+    } else if member.Type == "user_group" && member.UserGroup != nil {
+        log.Printf("- 团队: %s", member.UserGroup.Name)
+    }
+}
+```
+
 ## API 端点
 
 | 端点 | 方法 | 说明 |
 |------|------|------|
 | `/v1/auth/token` | GET | 获取访问令牌（不需要认证） |
-| `/v1/project/projects` | GET | 获取项目列表（需要 Bearer Token） |
+| `/v1/project/projects` | GET | 获取项目列表 |
+| `/v1/project/projects/{project_id}` | GET | 获取项目详情 |
+| `/v1/project/projects/{project_id}/members` | GET | 获取项目成员列表 |
+| `/v1/project/project/states` | GET | 获取项目状态列表 |
+| `/v1/project/projects/{project_id}/progress` | GET | 获取项目进度 |
+| `/v1/myself` | GET | 获取当前用户信息 |
+| `/v1/directory/users/{user_id}` | GET | 获取用户详情 |
+| `/v1/directory/users` | GET | 获取企业成员列表 |
 
 ## 文档
 
