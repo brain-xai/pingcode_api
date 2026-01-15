@@ -62,6 +62,11 @@ func (c *Client) Post(ctx context.Context, path string, query url.Values, body, 
 	return c.doRequest(ctx, http.MethodPost, path, query, body, result)
 }
 
+// Patch 发送 PATCH 请求
+func (c *Client) Patch(ctx context.Context, path string, query url.Values, body, result interface{}) error {
+	return c.doRequest(ctx, http.MethodPatch, path, query, body, result)
+}
+
 // buildPath 构建带路径参数的 URL（内部方法）
 func (c *Client) buildPath(pathTemplate string, pathParams map[string]string) (string, error) {
 	path := pathTemplate
@@ -82,6 +87,15 @@ func (c *Client) GetWithPathParams(ctx context.Context, pathTemplate string, pat
 		return err
 	}
 	return c.Get(ctx, path, query, result)
+}
+
+// PatchWithPathParams 发送带路径参数的 PATCH 请求
+func (c *Client) PatchWithPathParams(ctx context.Context, pathTemplate string, pathParams map[string]string, query url.Values, body, result interface{}) error {
+	path, err := c.buildPath(pathTemplate, pathParams)
+	if err != nil {
+		return err
+	}
+	return c.Patch(ctx, path, query, body, result)
 }
 
 // doRequest 发送 HTTP 请求（内部方法）
