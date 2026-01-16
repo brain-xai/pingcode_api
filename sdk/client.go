@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"sync"
+	"time"
 
 	"github.com/brain-xai/pingcode_api/internal/httpclient"
 	"github.com/brain-xai/pingcode_api/sdk/service/auth"
@@ -42,7 +43,7 @@ func NewClient(cfg *Config) (*Client, error) {
 	// 创建 HTTP 客户端
 	timeout := cfg.Timeout
 	if timeout == 0 {
-		timeout = 30 * defaultTimeout
+		timeout = defaultTimeout
 	}
 
 	httpClient, err := httpclient.NewClient(baseURL, timeout)
@@ -126,4 +127,4 @@ func (c *Client) WorkItem() *workitem.Service {
 	return c.workitem
 }
 
-const defaultTimeout = 30
+const defaultTimeout = 30 * time.Second

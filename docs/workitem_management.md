@@ -265,12 +265,17 @@ for _, l := range links {
 
 ### 取消关联
 
+> 注意：当前版本需要提供工作项 ID 和关联 ID
+
 ```go
-err := client.WorkItem().Unlink(ctx, linkID)
+err := client.WorkItem().UnlinkWithWorkItem(ctx, workItemID, linkID)
 if err != nil {
     log.Fatal(err)
 }
 ```
+
+旧方法 `Unlink(ctx, linkID)` 已废弃，请使用新方法 `UnlinkWithWorkItem`。
+
 
 ## 流转记录
 

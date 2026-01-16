@@ -11,12 +11,8 @@ import (
 )
 
 // ListLinkTypes 获取关联类型列表
+// 注意：projectID 参数当前未被后端使用，保留是为了未来扩展
 func (s *Service) ListLinkTypes(ctx context.Context, projectID string) ([]workitemmodel.WorkItemLinkType, error) {
-	// 参数校验
-	if projectID == "" {
-		return nil, fmt.Errorf("project_id is required")
-	}
-
 	// 发送 GET 请求
 	var resp apiworkitem.ListWorkItemRelationTypesResponse
 	if err := s.client.Get(ctx, "/v1/project/work_item/relation_types", nil, &resp); err != nil {
@@ -107,19 +103,28 @@ func (s *Service) ListLinks(ctx context.Context, workItemID string, filter worki
 	return links, pagination, nil
 }
 
-// Unlink 取消关联
+// Unlink 取消关联（已废弃，请使用 UnlinkWithWorkItem）
+// Deprecated: 此方法已废弃，因为需要 work_item_id 才能正确删除关联
+// 请使用 UnlinkWithWorkItem(ctx, workItemID, linkID) 替代
 func (s *Service) Unlink(ctx context.Context, linkID string) error {
+	return fmt.Errorf("Unlink is deprecated, please use UnlinkWithWorkItem(ctx, workItemID, linkID) instead")
+}
+
+// UnlinkWithWorkItem 取消工作项关联
+func (s *Service) UnlinkWithWorkItem(ctx context.Context, workItemID, linkID string) error {
 	// 参数校验
+	if workItemID == "" {
+		return fmt.Errorf("work_item_id cannot be empty")
+	}
 	if linkID == "" {
 		return fmt.Errorf("link_id cannot be empty")
 	}
 
-	// 构建路径参数（注意：URL 结构为 /work_items/{work_item_id}/relations/{relation_id}）
-	// 由于只有 linkID，我们需要从完整的关联 URL 中提取，这里简化处理
-	// 实际上调用方应该提供 workItemID 和 relationID
-	// 但根据 API 文档，我们可以只使用 relation_id 进行删除
-
-	pathParams := map[string]string{"work_item_id": "dummy", "relation_id": linkID}
+	// 构建路径参数
+	pathParams := map[string]string{
+		"work_item_id": workItemID,
+		"relation_id":  linkID,
+	}
 
 	// 发送 DELETE 请求
 	if err := s.client.DeleteWithPathParams(ctx, "/v1/project/work_items/{work_item_id}/relations/{relation_id}", pathParams, nil); err != nil {

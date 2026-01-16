@@ -30,6 +30,8 @@ type WorkItem struct {
 	Parent           *WorkItemSummary       `json:"parent"`
 	AssigneeID       string                 `json:"assignee_id"`
 	Assignee         *User                  `json:"assignee"`
+	ReporterID       string                 `json:"reporter_id"`
+	Reporter         *User                  `json:"reporter"`
 	ParticipantIDs   []string               `json:"participant_ids"`
 	Participants     []Participant          `json:"participants"`
 	StartAt          int64                  `json:"start_at"`
@@ -76,6 +78,7 @@ type WorkItemSummary struct {
 	Identifier string                 `json:"identifier"`
 	Title      string                 `json:"title"`
 	Type       string                 `json:"type"`
+	State      *WorkItemStatus        `json:"state"`
 	StartAt    int64                  `json:"start_at"`
 	EndAt      int64                  `json:"end_at"`
 	ParentID   string                 `json:"parent_id"`
@@ -225,6 +228,7 @@ func (w *WorkItem) ToModel() *workitemmodel.WorkItem {
 		Description:       w.Description,
 		ParentID:          w.ParentID,
 		AssigneeID:        w.AssigneeID,
+		ReporterID:        w.ReporterID,
 		ParticipantIDs:    w.ParticipantIDs,
 		StartAt:           w.StartAt,
 		EndAt:             w.EndAt,
@@ -234,7 +238,7 @@ func (w *WorkItem) ToModel() *workitemmodel.WorkItem {
 		BoardID:           w.BoardID,
 		EntryID:           w.EntryID,
 		SwimlaneID:        w.SwimlaneID,
-		Phase:             w.getTypeID(w.Phase),
+		Phase:             w.getPhaseID(w.Phase),
 		StoryPoints:       w.StoryPoints,
 		EstimatedWorkload: w.EstimatedWorkload,
 		RemainingWorkload: w.RemainingWorkload,
@@ -274,6 +278,11 @@ func (w *WorkItem) ToModel() *workitemmodel.WorkItem {
 	// 转换 Assignee
 	if w.Assignee != nil {
 		model.Assignee = w.Assignee.ToModel()
+	}
+
+	// 转换 Reporter
+	if w.Reporter != nil {
+		model.Reporter = w.Reporter.ToModel()
 	}
 
 	// 转换 Sprint
@@ -362,6 +371,11 @@ func (w *WorkItemSummary) ToModel() *workitemmodel.WorkItemSummary {
 		Name: w.Type,
 	}
 
+	// 转换 State
+	if w.State != nil {
+		model.State = w.State.ToModel()
+	}
+
 	// 转换 Properties
 	if w.Properties != nil {
 		model.Properties = make(map[string]string)
@@ -444,8 +458,8 @@ func (p *Participant) ToModel() *workitemmodel.Participant {
 	return model
 }
 
-// getTypeID 从 Phase 获取 ID
-func (w *WorkItem) getTypeID(phase *Phase) string {
+// getPhaseID 从 Phase 获取 Phase ID
+func (w *WorkItem) getPhaseID(phase *Phase) string {
 	if phase == nil {
 		return ""
 	}
