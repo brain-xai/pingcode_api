@@ -114,6 +114,42 @@ func main() {
 	fmt.Printf("  状态: %s\n", getStateName(reqDetail.State))
 	fmt.Printf("  进度: %.0f%%\n", reqDetail.Progress*100)
 
+	// 6. 获取产品的需求配置信息（用于 UI 场景）
+	fmt.Println("\n6. 获取需求配置信息...")
+
+	// 获取可用状态
+	states, err := client.Ship().GetRequirementStates(ctx, product.ID)
+	if err != nil {
+		log.Printf("获取需求状态失败: %v", err)
+	} else {
+		fmt.Printf("可用状态 (%d 个):\n", states.Total)
+		for _, state := range states.Values {
+			fmt.Printf("  - %s (%s)\n", state.Name, state.Type)
+		}
+	}
+
+	// 获取可用优先级
+	priorities, err := client.Ship().GetRequirementPriorities(ctx, product.ID)
+	if err != nil {
+		log.Printf("获取需求优先级失败: %v", err)
+	} else {
+		fmt.Printf("可用优先级 (%d 个):\n", priorities.Total)
+		for _, priority := range priorities.Values {
+			fmt.Printf("  - %s\n", priority.Name)
+		}
+	}
+
+	// 获取可用模块
+	suites, err := client.Ship().GetRequirementSuites(ctx, product.ID)
+	if err != nil {
+		log.Printf("获取需求模块失败: %v", err)
+	} else {
+		fmt.Printf("可用模块 (%d 个):\n", suites.Total)
+		for _, suite := range suites.Values {
+			fmt.Printf("  - %s (%s)\n", suite.Name, suite.Type)
+		}
+	}
+
 	fmt.Println("\n========================================")
 	fmt.Println("示例执行完成！")
 	fmt.Println("========================================")

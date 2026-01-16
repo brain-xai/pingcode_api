@@ -136,3 +136,58 @@ type RequirementUpdateInput struct {
 	SuiteID     *string                // 产品模块 ID（可选）
 	Properties  map[string]interface{} // 自定义属性（可选）
 }
+
+// RequirementStateList 需求状态列表
+type RequirementStateList struct {
+	PageSize  int                 // 页面大小
+	PageIndex int                 // 页码
+	Total     int                 // 总数
+	Values    []RequirementState  // 状态列表
+}
+
+// RequirementPriorityList 需求优先级列表
+type RequirementPriorityList struct {
+	PageSize  int                    // 页面大小
+	PageIndex int                    // 页码
+	Total     int                    // 总数
+	Values    []RequirementPriority  // 优先级列表
+}
+
+// RequirementPropertyOption 需求属性选项
+type RequirementPropertyOption struct {
+	ID   string // 选项 ID
+	Text string // 选项文本
+}
+
+// RequirementProperty 需求属性定义
+type RequirementProperty struct {
+	ID      string                       // 属性 ID
+	URL     string                       // 属性资源地址
+	Name    string                       // 属性名称
+	Type    string                       // 属性类型：text, select, number 等
+	Options []RequirementPropertyOption  // 选项列表（当 type=select 时）
+}
+
+// RequirementPropertyList 需求属性列表
+type RequirementPropertyList struct {
+	PageSize  int                    // 页面大小
+	PageIndex int                    // 页码
+	Total     int                    // 总数
+	Values    []RequirementProperty  // 属性列表
+}
+
+// RequirementSuiteList 需求模块列表
+type RequirementSuiteList struct {
+	PageSize  int     // 页面大小
+	PageIndex int     // 页码
+	Total     int     // 总数
+	Values    []Suite // 模块列表
+}
+
+// RequirementPlanList 需求排期列表
+type RequirementPlanList struct {
+	PageSize  int    // 页面大小
+	PageIndex int    // 页码
+	Total     int    // 总数
+	Values    []Plan // 排期列表
+}

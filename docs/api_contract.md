@@ -110,5 +110,131 @@
   - 必要时通过新版本 API 暴露新行为，而不是直接改变旧 API。
 - 如确有必须违背以上规则的极端情况：
   - 必须在设计评审中记录例外原因和影响范围；
-  - 在发布说明中明确标注为“破坏性变更”。
+  - 在发布说明中明确标注为"破坏性变更"。
+
+---
+
+## 7. 对外 API 列表
+
+### 7.1 Ship 领域 - 产品管理
+
+#### 查询类
+- `ListProducts(ctx, filter) ([]Product, *Pagination, error)`
+  - 获取产品列表
+  - 参数：filter（包含分页和查询条件）
+  - 返回：产品列表和分页信息
+
+- `GetProduct(ctx, productID) (*Product, error)`
+  - 按 ID 获取产品详情
+  - 参数：productID（必填）
+  - 返回：产品详情
+
+### 7.2 Ship 领域 - 需求管理
+
+#### 查询类
+- `ListRequirements(ctx, filter) ([]Requirement, *Pagination, error)`
+  - 获取需求列表
+  - 参数：filter（包含产品 ID、状态 ID、优先级 ID、关键字等过滤条件）
+  - 返回：需求列表和分页信息
+
+- `GetRequirement(ctx, requirementID) (*Requirement, error)`
+  - 按 ID 获取需求详情
+  - 参数：requirementID（必填）
+  - 返回：需求详情
+
+#### 写入类
+- `CreateRequirement(ctx, input) (*Requirement, error)`
+  - 创建新需求
+  - 参数：input（包含产品 ID、标题等必填字段）
+  - 返回：创建的需求详情
+
+- `UpdateRequirement(ctx, requirementID, input) (*Requirement, error)`
+  - 更新需求信息
+  - 参数：requirementID（必填）、input（包含标题、描述、状态 ID、优先级 ID 等可选字段）
+  - 返回：更新后的需求详情
+  - 注意：状态变更通过传入 `StateID` 字段实现
+
+### 7.3 Ship 领域 - 需求辅助接口
+
+#### 配置查询类（用于 UI 场景）
+
+- `GetRequirementStates(ctx, productID) (*RequirementStateList, error)`
+  - 获取产品下的需求状态列表
+  - 参数：productID（必填）
+  - 返回：分页的状态列表（包含 ID、名称、类型）
+
+- `GetRequirementPriorities(ctx, productID) (*RequirementPriorityList, error)`
+  - 获取产品下的优先级列表
+  - 参数：productID（必填）
+  - 返回：分页的优先级列表（包含 ID、名称）
+
+- `GetRequirementProperties(ctx, productID) (*RequirementPropertyList, error)`
+  - 获取产品下的自定义属性列表
+  - 参数：productID（必填）
+  - 返回：分页的属性列表（包含 ID、名称、类型、选项）
+
+- `GetRequirementSuites(ctx, productID) (*RequirementSuiteList, error)`
+  - 获取产品下的模块列表
+  - 参数：productID（必填）
+  - 返回：分页的模块列表（包含 ID、名称、类型）
+
+- `GetRequirementPlans(ctx, productID) (*RequirementPlanList, error)`
+  - 获取产品下的排期列表
+  - 参数：productID（必填）
+  - 返回：分页的排期列表（包含 ID、名称、URL）
+
+**用途说明**：
+- 这些接口主要用于 UI 场景
+- 在创建/编辑需求时提供下拉选项
+- 所有接口都需要 `productID` 参数
+- 返回结果包含分页信息
+
+### 7.4 Project 领域 - 项目管理
+
+#### 查询类
+- `ListProjects(ctx, filter) ([]Project, *Pagination, error)`
+  - 获取项目列表
+
+- `GetProject(ctx, projectID) (*Project, error)`
+  - 按 ID 获取项目详情
+
+#### 写入类
+- `CreateProject(ctx, input) (*Project, error)`
+  - 创建新项目
+
+- `UpdateProject(ctx, projectID, input) (*Project, error)`
+  - 更新项目信息
+
+- `DeleteProject(ctx, projectID) error`
+  - 删除项目
+
+### 7.5 Global 领域 - 全局服务
+
+- `GetUser(ctx, userID) (*User, error)`
+  - 获取用户信息
+  - 参数：userID（必填）
+  - 返回：用户详情
+
+---
+
+## 8. 版本历史
+
+### v0.5.0 (Phase 5)
+- 新增：需求辅助接口（5 个）
+  - `GetRequirementStates`
+  - `GetRequirementPriorities`
+  - `GetRequirementProperties`
+  - `GetRequirementSuites`
+  - `GetRequirementPlans`
+
+### v0.4.0 (Phase 4)
+- 新增：Project 领域完整 CRUD 接口
+- 新增：Global 服务用户信息查询
+
+### v0.3.0 (Phase 3)
+- 新增：Ship 产品管理接口
+- 新增：Ship 需求管理核心接口
+
+### v0.1.0 (Phase 1)
+- 初始版本：基础框架和认证机制
 

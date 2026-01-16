@@ -311,3 +311,87 @@ func toString(v interface{}) string {
 		return fmt.Sprintf("%v", val)
 	}
 }
+
+// ============= 辅助接口响应 DTO =============
+
+// ListRequirementStatesResponse 需求状态列表响应
+type ListRequirementStatesResponse struct {
+	PageSize  int                 `json:"page_size"`
+	PageIndex int                 `json:"page_index"`
+	Total     int                 `json:"total"`
+	Values    []RequirementState  `json:"values"`
+}
+
+// ListRequirementPrioritiesResponse 需求优先级列表响应
+type ListRequirementPrioritiesResponse struct {
+	PageSize  int                    `json:"page_size"`
+	PageIndex int                    `json:"page_index"`
+	Total     int                    `json:"total"`
+	Values    []RequirementPriority  `json:"values"`
+}
+
+// RequirementPropertyOption 需求属性选项 DTO
+type RequirementPropertyOption struct {
+	ID   string `json:"_id"`
+	Text string `json:"text"`
+}
+
+// RequirementProperty 需求属性 DTO
+type RequirementProperty struct {
+	ID      string                       `json:"id"`
+	URL     string                       `json:"url"`
+	Name    string                       `json:"name"`
+	Type    string                       `json:"type"`
+	Options []RequirementPropertyOption  `json:"options"`
+}
+
+// ListRequirementPropertiesResponse 需求属性列表响应
+type ListRequirementPropertiesResponse struct {
+	PageSize  int                    `json:"page_size"`
+	PageIndex int                    `json:"page_index"`
+	Total     int                    `json:"total"`
+	Values    []RequirementProperty  `json:"values"`
+}
+
+// ListRequirementSuitesResponse 需求模块列表响应
+type ListRequirementSuitesResponse struct {
+	PageSize  int     `json:"page_size"`
+	PageIndex int     `json:"page_index"`
+	Total     int     `json:"total"`
+	Values    []Suite `json:"values"`
+}
+
+// ListRequirementPlansResponse 需求排期列表响应
+type ListRequirementPlansResponse struct {
+	PageSize  int    `json:"page_size"`
+	PageIndex int    `json:"page_index"`
+	Total     int    `json:"total"`
+	Values    []Plan `json:"values"`
+}
+
+// ============= 辅助接口映射方法 =============
+
+// ToModel 将 RequirementProperty DTO 转换为 Model
+func (p *RequirementProperty) ToModel() *shipmodel.RequirementProperty {
+	model := &shipmodel.RequirementProperty{
+		ID:   p.ID,
+		URL:  p.URL,
+		Name: p.Name,
+		Type: p.Type,
+	}
+	if len(p.Options) > 0 {
+		model.Options = make([]shipmodel.RequirementPropertyOption, len(p.Options))
+		for i, opt := range p.Options {
+			model.Options[i] = *opt.ToModel()
+		}
+	}
+	return model
+}
+
+// ToModel 将 RequirementPropertyOption DTO 转换为 Model
+func (o *RequirementPropertyOption) ToModel() *shipmodel.RequirementPropertyOption {
+	return &shipmodel.RequirementPropertyOption{
+		ID:   o.ID,
+		Text: o.Text,
+	}
+}

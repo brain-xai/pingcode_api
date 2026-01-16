@@ -234,3 +234,165 @@ func (s *Service) UpdateRequirement(ctx context.Context, requirementID string, i
 
 	return resp.ToModel(), nil
 }
+
+// ============= 需求辅助接口方法 =============
+
+// GetRequirementStates 获取需求状态列表
+// 用于 UI 场景：在创建/编辑需求时显示状态下拉选项
+func (s *Service) GetRequirementStates(ctx context.Context, productID string) (*shipmodel.RequirementStateList, error) {
+	// 参数校验
+	if productID == "" {
+		return nil, fmt.Errorf("product_id cannot be empty")
+	}
+
+	// 构建查询参数
+	query := url.Values{}
+	query.Set("product_id", productID)
+
+	// 发送 GET 请求
+	var resp apiship.ListRequirementStatesResponse
+	if err := s.client.Get(ctx, "/v1/ship/idea/states", query, &resp); err != nil {
+		return nil, fmt.Errorf("failed to get requirement states: %w", err)
+	}
+
+	// 转换 DTO 为 Model
+	states := make([]shipmodel.RequirementState, len(resp.Values))
+	for i, state := range resp.Values {
+		states[i] = *state.ToModel()
+	}
+
+	return &shipmodel.RequirementStateList{
+		PageSize:  resp.PageSize,
+		PageIndex: resp.PageIndex,
+		Total:     resp.Total,
+		Values:    states,
+	}, nil
+}
+
+// GetRequirementPriorities 获取需求优先级列表
+// 用于 UI 场景：在创建/编辑需求时显示优先级下拉选项
+func (s *Service) GetRequirementPriorities(ctx context.Context, productID string) (*shipmodel.RequirementPriorityList, error) {
+	// 参数校验
+	if productID == "" {
+		return nil, fmt.Errorf("product_id cannot be empty")
+	}
+
+	// 构建查询参数
+	query := url.Values{}
+	query.Set("product_id", productID)
+
+	// 发送 GET 请求
+	var resp apiship.ListRequirementPrioritiesResponse
+	if err := s.client.Get(ctx, "/v1/ship/idea/priorities", query, &resp); err != nil {
+		return nil, fmt.Errorf("failed to get requirement priorities: %w", err)
+	}
+
+	// 转换 DTO 为 Model
+	priorities := make([]shipmodel.RequirementPriority, len(resp.Values))
+	for i, priority := range resp.Values {
+		priorities[i] = *priority.ToModel()
+	}
+
+	return &shipmodel.RequirementPriorityList{
+		PageSize:  resp.PageSize,
+		PageIndex: resp.PageIndex,
+		Total:     resp.Total,
+		Values:    priorities,
+	}, nil
+}
+
+// GetRequirementProperties 获取需求属性列表
+// 用于 UI 场景：在创建/编辑需求时显示自定义属性字段
+func (s *Service) GetRequirementProperties(ctx context.Context, productID string) (*shipmodel.RequirementPropertyList, error) {
+	// 参数校验
+	if productID == "" {
+		return nil, fmt.Errorf("product_id cannot be empty")
+	}
+
+	// 构建查询参数
+	query := url.Values{}
+	query.Set("product_id", productID)
+
+	// 发送 GET 请求
+	var resp apiship.ListRequirementPropertiesResponse
+	if err := s.client.Get(ctx, "/v1/ship/idea/properties", query, &resp); err != nil {
+		return nil, fmt.Errorf("failed to get requirement properties: %w", err)
+	}
+
+	// 转换 DTO 为 Model
+	properties := make([]shipmodel.RequirementProperty, len(resp.Values))
+	for i, prop := range resp.Values {
+		properties[i] = *prop.ToModel()
+	}
+
+	return &shipmodel.RequirementPropertyList{
+		PageSize:  resp.PageSize,
+		PageIndex: resp.PageIndex,
+		Total:     resp.Total,
+		Values:    properties,
+	}, nil
+}
+
+// GetRequirementSuites 获取需求模块列表
+// 用于 UI 场景：在创建/编辑需求时显示模块下拉选项
+func (s *Service) GetRequirementSuites(ctx context.Context, productID string) (*shipmodel.RequirementSuiteList, error) {
+	// 参数校验
+	if productID == "" {
+		return nil, fmt.Errorf("product_id cannot be empty")
+	}
+
+	// 构建查询参数
+	query := url.Values{}
+	query.Set("product_id", productID)
+
+	// 发送 GET 请求
+	var resp apiship.ListRequirementSuitesResponse
+	if err := s.client.Get(ctx, "/v1/ship/idea/suites", query, &resp); err != nil {
+		return nil, fmt.Errorf("failed to get requirement suites: %w", err)
+	}
+
+	// 转换 DTO 为 Model
+	suites := make([]shipmodel.Suite, len(resp.Values))
+	for i, suite := range resp.Values {
+		suites[i] = *suite.ToModel()
+	}
+
+	return &shipmodel.RequirementSuiteList{
+		PageSize:  resp.PageSize,
+		PageIndex: resp.PageIndex,
+		Total:     resp.Total,
+		Values:    suites,
+	}, nil
+}
+
+// GetRequirementPlans 获取需求排期列表
+// 用于 UI 场景：在创建/编辑需求时显示排期下拉选项
+func (s *Service) GetRequirementPlans(ctx context.Context, productID string) (*shipmodel.RequirementPlanList, error) {
+	// 参数校验
+	if productID == "" {
+		return nil, fmt.Errorf("product_id cannot be empty")
+	}
+
+	// 构建查询参数
+	query := url.Values{}
+	query.Set("product_id", productID)
+
+	// 发送 GET 请求
+	var resp apiship.ListRequirementPlansResponse
+	if err := s.client.Get(ctx, "/v1/ship/idea/plans", query, &resp); err != nil {
+		return nil, fmt.Errorf("failed to get requirement plans: %w", err)
+	}
+
+	// 转换 DTO 为 Model
+	plans := make([]shipmodel.Plan, len(resp.Values))
+	for i, plan := range resp.Values {
+		plans[i] = *plan.ToModel()
+	}
+
+	return &shipmodel.RequirementPlanList{
+		PageSize:  resp.PageSize,
+		PageIndex: resp.PageIndex,
+		Total:     resp.Total,
+		Values:    plans,
+	}, nil
+}
