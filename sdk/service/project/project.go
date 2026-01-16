@@ -168,3 +168,76 @@ func (s *Service) GetProgress(ctx context.Context, projectID string) (*projectmo
 		CompletionRate:  resp.CompletionRate,
 	}, nil
 }
+
+// Create 创建项目
+func (s *Service) Create(ctx context.Context, input projectmodel.ProjectCreateInput) (*projectmodel.Project, error) {
+	// 参数校验
+	if input.Name == "" {
+		return nil, fmt.Errorf("name is required")
+	}
+	if len(input.Name) > 255 {
+		return nil, fmt.Errorf("name must be less than 255 characters")
+	}
+	if input.Type == "" {
+		return nil, fmt.Errorf("type is required")
+	}
+	if !isValidProjectType(input.Type) {
+		return nil, fmt.Errorf("type must be one of: scrum, kanban, waterfall, hybrid")
+	}
+	if input.Identifier == "" {
+		return nil, fmt.Errorf("identifier is required")
+	}
+	if len(input.Identifier) > 15 {
+		return nil, fmt.Errorf("identifier must be less than 15 characters")
+	}
+	if input.ScopeType == "user_group" && input.ScopeID == "" {
+		return nil, fmt.Errorf("scope_id is required when scope_type is user_group")
+	}
+
+	// 构建请求 DTO
+	reqDTO := apiproject.ToCreateRequestDTO(input)
+
+	// 发送 POST 请求
+	var resp apiproject.Project
+	if err := s.client.Post(ctx, "/v1/project/projects", nil, reqDTO, &resp); err != nil {
+		return nil, fmt.Errorf("failed to create project: %w", err)
+	}
+
+	return resp.ToModel(), nil
+}
+
+// Update 更新项目
+func (s *Service) Update(ctx context.Context, projectID string, input projectmodel.ProjectUpdateInput) (*projectmodel.Project, error) {
+	if projectID == "" {
+		return nil, fmt.Errorf("project_id cannot be empty")
+	}
+
+	reqDTO := apiproject.ToUpdateRequestDTO(input)
+	pathParams := map[string]string{"project_id": projectID}
+
+	var resp apiproject.Project
+	if err := s.client.PatchWithPathParams(ctx, "/v1/project/projects/{project_id}", pathParams, nil, reqDTO, &resp); err != nil {
+		return nil, fmt.Errorf("failed to update project: %w", err)
+	}
+
+	return resp.ToModel(), nil
+}
+
+// Delete 删除项目
+func (s *Service) Delete(ctx context.Context, projectID string) error {
+	if projectID == "" {
+		return fmt.Errorf("project_id cannot be empty")
+	}
+
+	pathParams := map[string]string{"project_id": projectID}
+	if err := s.client.DeleteWithPathParams(ctx, "/v1/project/projects/{project_id}", pathParams, nil); err != nil {
+		return fmt.Errorf("failed to delete project: %w", err)
+	}
+
+	return nil
+}
+
+// isValidProjectType 验证项目类型是否有效
+func isValidProjectType(t string) bool {
+	return t == "scrum" || t == "kanban" || t == "waterfall" || t == "hybrid"
+}

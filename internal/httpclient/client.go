@@ -67,6 +67,11 @@ func (c *Client) Patch(ctx context.Context, path string, query url.Values, body,
 	return c.doRequest(ctx, http.MethodPatch, path, query, body, result)
 }
 
+// Delete 发送 DELETE 请求
+func (c *Client) Delete(ctx context.Context, path string, query url.Values) error {
+	return c.doRequest(ctx, http.MethodDelete, path, query, nil, nil)
+}
+
 // buildPath 构建带路径参数的 URL（内部方法）
 func (c *Client) buildPath(pathTemplate string, pathParams map[string]string) (string, error) {
 	path := pathTemplate
@@ -89,6 +94,15 @@ func (c *Client) GetWithPathParams(ctx context.Context, pathTemplate string, pat
 	return c.Get(ctx, path, query, result)
 }
 
+// PostWithPathParams 发送带路径参数的 POST 请求
+func (c *Client) PostWithPathParams(ctx context.Context, pathTemplate string, pathParams map[string]string, query url.Values, body, result interface{}) error {
+	path, err := c.buildPath(pathTemplate, pathParams)
+	if err != nil {
+		return err
+	}
+	return c.Post(ctx, path, query, body, result)
+}
+
 // PatchWithPathParams 发送带路径参数的 PATCH 请求
 func (c *Client) PatchWithPathParams(ctx context.Context, pathTemplate string, pathParams map[string]string, query url.Values, body, result interface{}) error {
 	path, err := c.buildPath(pathTemplate, pathParams)
@@ -96,6 +110,15 @@ func (c *Client) PatchWithPathParams(ctx context.Context, pathTemplate string, p
 		return err
 	}
 	return c.Patch(ctx, path, query, body, result)
+}
+
+// DeleteWithPathParams 发送带路径参数的 DELETE 请求
+func (c *Client) DeleteWithPathParams(ctx context.Context, pathTemplate string, pathParams map[string]string, query url.Values) error {
+	path, err := c.buildPath(pathTemplate, pathParams)
+	if err != nil {
+		return err
+	}
+	return c.Delete(ctx, path, query)
 }
 
 // doRequest 发送 HTTP 请求（内部方法）
