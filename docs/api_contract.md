@@ -336,30 +336,15 @@
 
 ## 8. 版本历史
 
-### v0.6.0 (Phase 6)
-- 新增：WorkItem 领域完整接口（21 个）
-  - 基础操作：Create、Update、BatchUpdate、List、Get、Delete
-  - 属性与分类：ListTypes、ListStatuses、ListFields、ListPriorities、ListTags
-  - 标签管理：AddTag、RemoveTag
-  - 关联管理：ListLinkTypes、Link、ListLinks、Unlink
-  - 流程与交付目标：ListTransitions、CreateDeliveryTarget、UpdateDeliveryTarget、ListDeliveryTargets、DeleteDeliveryTarget
+详细的版本变更记录请查看 [CHANGELOG.md](../CHANGELOG.md)。
 
-### v0.5.0 (Phase 5)
-- 新增：需求辅助接口（5 个）
-  - `GetRequirementStates`
-  - `GetRequirementPriorities`
-  - `GetRequirementProperties`
-  - `GetRequirementSuites`
-  - `GetRequirementPlans`
+以下为主要版本概览：
 
-### v0.4.0 (Phase 4)
-- 新增：Project 领域完整 CRUD 接口
-- 新增：Global 服务用户信息查询
-
-### v0.3.0 (Phase 3)
-- 新增：Ship 产品管理接口
-- 新增：Ship 需求管理核心接口
-
-### v0.1.0 (Phase 1)
-- 初始版本：基础框架和认证机制
+- **v0.7.0** (Phase 7) - 质量问题收敛
+- **v0.6.0** (Phase 6) - 工作项领域接口（21个）
+- **v0.5.0** (Phase 5) - 需求辅助接口（5个）
+- **v0.4.0** (Phase 4) - Project领域CRUD + Global服务
+- **v0.3.0** (Phase 3) - Ship领域接口
+- **v0.2.0** (Phase 2) - 读取类接口完善
+- **v0.1.0** (Phase 1) - 基础框架搭建
 
