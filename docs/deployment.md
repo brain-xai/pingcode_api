@@ -306,7 +306,33 @@ SDK 的配置结构 `Config` 是部署行为的核心入口，规范如下：
 约束：
 
 - PR 必须通过上述阶段才能合并到主干。
-- 主干分支任何 commit 必须保持“随时可发布”的状态。
+- 主干分支任何 commit 必须保持"随时可发布"的状态。
+
+### 7.1.1 当前 CI 实现
+
+项目使用 GitHub Actions 实现 CI，配置文件位于 `.github/workflows/ci.yml`。
+
+**触发条件**：
+- push 到 main 分支
+- 针对 main 分支的 pull request
+
+**检查步骤**：
+1. `go mod download` - 下载依赖
+2. `go build ./...` - 编译检查
+3. `go test ./... -v -race` - 测试并检测竞态条件
+
+**标准命令**：
+开发者在本地应使用以下命令确保代码质量：
+```bash
+# 编译检查
+go build ./...
+
+# 运行测试
+go test ./... -v
+
+# 竞态检测
+go test ./... -race
+```
 
 ### 7.2 发布流水线（可选自动化）
 

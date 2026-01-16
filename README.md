@@ -206,20 +206,65 @@ for _, member := range members {
 
 项目提供完整的示例代码，位于 `examples/` 目录：
 
-- `basic_usage` - 基础使用示例：获取项目列表
-- `project_overview` - 项目管理完整示例
-- `ship_products` - 产品管理示例
-- `ship_requirements` - 需求管理示例
+| 示例目录 | 功能说明 | 主要演示 |
+|---------|---------|---------|
+| `basic_usage` | 最小可运行示例 | 获取项目列表、环境变量配置 |
+| `project_overview` | 项目管理整体验证 | 项目列表、详情、成员、进度查询 |
+| `ship_products` | 产品管理 | 获取产品列表和详情 |
+| `ship_requirements` | 需求管理 | 需求查询、创建、更新 |
+| `list_ideas` | 创意列表查询 | 获取产品创意列表 |
+| `workitems` | 工作项管理 | 创建、更新、查询、关联工作项 |
 
-运行示例：
+### 快速运行示例
+
+所有示例均使用环境变量进行配置：
 
 ```bash
-cd examples/basic_usage
+cd examples/basic_usage  # 可替换为其他示例目录
 export PINGCODE_BASE_URL=https://open.pingcode.com
 export PINGCODE_CLIENT_ID=your_client_id
 export PINGCODE_CLIENT_SECRET=your_client_secret
 go run main.go
 ```
+
+## 兼容性与版本策略
+
+### 语义化版本
+
+本项目遵循 [语义化版本 (SemVer)](https://semver.org/lang/zh-CN/) 规范：
+
+- **MAJOR** (主版本号) - 不兼容的 API 变更
+- **MINOR** (次版本号) - 向后兼容的功能新增
+- **PATCH** (修订号) - 向后兼容的问题修复
+
+### API 兼容承诺
+
+我们对 `sdk/` 包下的公开 API 做以下承诺：
+
+1. **稳定性保证** - 一旦某个导出类型、方法进入已发布版本，即视为对外契约
+2. **静默变更禁止** - 不会在 MINOR/PATCH 版本中无声改变已发布 API 的语义或行为
+3. **废弃流程** - 需要移除某个 API 时，会：
+   - 标记为 `Deprecated`
+   - 在文档中说明替代方案
+   - 保留至少一个 MINOR 版本周期
+   - 在 CHANGELOG 中记录
+
+### 破坏性变更处理
+
+所有破坏性变更仅在新 MAJOR 版本中进行，且必须：
+
+- 在 CHANGELOG.md 中明确记录
+- 提供详细的迁移指南
+- 通过合理的版本号升级路径
+
+详细规则请参考 [API 契约规范](docs/api_contract.md)。
+
+### 当前版本
+
+当前版本处于 **0.x** 阶段，以快速迭代为主，但依然遵守基本的兼容性约束。
+
+- 公开 API 一旦发布，尽量避免修改
+- 必须修改时，会在文档中明确说明并提供迁移路径
 
 ## 文档
 
@@ -239,4 +284,15 @@ go run main.go
 
 ## License
 
-[待定]
+本项目采用 [Apache License 2.0](LICENSE) 开源许可。
+
+### 许可概要
+
+- ✅ **商用使用** - 可以用于商业目的
+- ✅ **修改** - 可以修改源代码
+- ✅ **分发** - 可以分发原版或修改版
+- ✅ **私用** - 可以私下使用和修改
+- ⚠️ **责任** - 软件按"原样"提供，不提供任何担保
+- 📄 **要求** - 必须保留版权和许可证声明
+
+详细条款请参见 [LICENSE](LICENSE) 文件。

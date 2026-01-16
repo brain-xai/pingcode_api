@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.8.0] - 2025-01-16 (Phase 8: 对外发布前的兼容性与发布体系完善)
+
+### Added
+- 引入 Apache License 2.0 开源许可
+- 新增 GitHub Actions CI 配置，自动化构建和测试
+- README 新增"兼容性与版本策略"章节，明确 SemVer 和 API 兼容承诺
+- README 新增示例索引表，提升文档可读性
+
+### Changed
+- 完善 deployment.md 文档，补充 CI 使用说明
+- 优化 README 的 License 章节，提供详细的许可说明
+- 更新示例代码章节，添加所有 6 个示例的索引表
+
+### Documentation
+- 明确对外 API 兼容性承诺
+- 补充 CI/CD 标准流程说明
+
 ## [0.7.0] - 2025-01-16 (Phase 7: 质量问题收敛)
 
 ### Added
@@ -110,6 +127,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - 建立api_contract.md契约规范体系
 
 [Unreleased]: https://github.com/brain-xai/pingcode_api/compare/v0.7.0...HEAD
+[0.8.0]: https://github.com/brain-xai/pingcode_api/compare/v0.7.0...v0.8.0
 [0.7.0]: https://github.com/brain-xai/pingcode_api/compare/v0.6.0...v0.7.0
 [0.6.0]: https://github.com/brain-xai/pingcode_api/compare/v0.5.0...v0.6.0
 [0.5.0]: https://github.com/brain-xai/pingcode_api/compare/v0.4.0...v0.5.0
