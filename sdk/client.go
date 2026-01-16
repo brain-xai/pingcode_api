@@ -10,6 +10,7 @@ import (
 	"github.com/brain-xai/pingcode_api/sdk/service/global"
 	"github.com/brain-xai/pingcode_api/sdk/service/project"
 	"github.com/brain-xai/pingcode_api/sdk/service/ship"
+	"github.com/brain-xai/pingcode_api/sdk/service/workitem"
 )
 
 // Client SDK 客户端
@@ -20,9 +21,11 @@ type Client struct {
 	project   *project.Service
 	global    *global.Service
 	ship      *ship.Service
+	workitem  *workitem.Service
 	projectMu sync.RWMutex
 	globalMu  sync.RWMutex
 	shipMu    sync.RWMutex
+	workitemMu sync.RWMutex
 }
 
 // NewClient 创建新的 SDK 客户端
@@ -109,6 +112,18 @@ func (c *Client) Ship() *ship.Service {
 	}
 
 	return c.ship
+}
+
+// WorkItem 返回工作项服务（懒加载）
+func (c *Client) WorkItem() *workitem.Service {
+	c.workitemMu.Lock()
+	defer c.workitemMu.Unlock()
+
+	if c.workitem == nil {
+		c.workitem = workitem.NewService(c.http, c.config.BaseURL)
+	}
+
+	return c.workitem
 }
 
 const defaultTimeout = 30

@@ -215,9 +215,134 @@
   - 参数：userID（必填）
   - 返回：用户详情
 
+### 7.6 WorkItem 领域 - 工作项管理
+
+#### 基础操作类
+
+- `Create(ctx, input) (*WorkItem, error)`
+  - 创建工作项
+  - 参数：input（包含项目 ID、类型 ID、标题等必填字段）
+  - 返回：创建的工作项详情
+
+- `Update(ctx, workItemID, input) (*WorkItem, error)`
+  - 部分更新工作项
+  - 参数：workItemID（必填）、input（包含所有可选字段，使用指针类型表示部分更新）
+  - 返回：更新后的工作项详情
+
+- `BatchUpdate(ctx, input) (*WorkItemBatchUpdateResult, error)`
+  - 批量部分更新工作项属性
+  - 参数：input（包含工作项 ID 列表和更新字段）
+  - 返回：批量更新结果（成功 ID 列表和失败 ID 列表）
+
+- `List(ctx, filter) ([]WorkItem, *Pagination, error)`
+  - 获取工作项列表
+  - 参数：filter（包含项目 ID、类型 ID、状态 ID、负责人 ID、标签 ID 等过滤条件）
+  - 返回：工作项列表和分页信息
+
+- `Get(ctx, workItemID) (*WorkItem, error)`
+  - 按 ID 获取工作项详情
+  - 参数：workItemID（必填）
+  - 返回：工作项详情
+
+- `Delete(ctx, workItemID) error`
+  - 删除工作项
+  - 参数：workItemID（必填）
+
+#### 属性与分类类
+
+- `ListTypes(ctx, scope) ([]WorkItemType, error)`
+  - 获取工作项类型列表
+  - 参数：scope（包含项目 ID）
+  - 返回：工作项类型列表
+
+- `ListStatuses(ctx, filter) (*WorkItemStatusList, error)`
+  - 获取工作项状态列表
+  - 参数：filter（包含项目 ID、可选的类型 ID）
+  - 返回：分页的状态列表
+
+- `ListFields(ctx, filter) (*WorkItemFieldList, error)`
+  - 获取工作项属性列表
+  - 参数：filter（包含项目 ID、可选的类型 ID）
+  - 返回：分页的属性列表
+
+- `ListPriorities(ctx, projectID) (*WorkItemPriorityList, error)`
+  - 获取工作项优先级列表
+  - 参数：projectID（必填）
+  - 返回：分页的优先级列表
+
+- `ListTags(ctx, filter) (*WorkItemTagList, error)`
+  - 获取工作项标签列表
+  - 参数：filter（包含项目 ID、可选的类型 ID）
+  - 返回：分页的标签列表
+
+#### 标签管理类
+
+- `AddTag(ctx, workItemID, tagID) error`
+  - 向工作项添加标签
+  - 参数：workItemID（必填）、tagID（必填）
+
+- `RemoveTag(ctx, workItemID, tagID) error`
+  - 从工作项移除标签
+  - 参数：workItemID（必填）、tagID（必填）
+
+#### 关联管理类
+
+- `ListLinkTypes(ctx, projectID) ([]WorkItemLinkType, error)`
+  - 获取关联类型列表
+  - 参数：projectID（必填）
+  - 返回：关联类型列表
+
+- `Link(ctx, workItemID, targetID, linkTypeID) (*WorkItemLink, error)`
+  - 关联工作项
+  - 参数：workItemID（源工作项 ID）、targetID（目标工作项 ID）、linkTypeID（关联类型 ID）
+  - 返回：创建的关联详情
+
+- `ListLinks(ctx, workItemID, filter) ([]WorkItemLink, *Pagination, error)`
+  - 获取关联的工作项列表
+  - 参数：workItemID（必填）、filter（可选的关联类型 ID）
+  - 返回：关联列表和分页信息
+
+- `Unlink(ctx, linkID) error`
+  - 取消关联
+  - 参数：linkID（必填）
+
+#### 流程与交付目标类
+
+- `ListTransitions(ctx, workItemID) (*WorkItemTransitionList, error)`
+  - 获取工作项流转记录列表
+  - 参数：workItemID（必填）
+  - 返回：分页的流转记录列表
+
+- `CreateDeliveryTarget(ctx, input) (*WorkItemDeliveryTarget, error)`
+  - 创建工作项交付目标
+  - 参数：input（包含工作项 ID、名称等必填字段）
+  - 返回：创建的交付目标详情
+
+- `UpdateDeliveryTarget(ctx, targetID, input) (*WorkItemDeliveryTarget, error)`
+  - 部分更新工作项交付目标
+  - 参数：targetID（必填）、input（包含所有可选字段）
+  - 返回：更新后的交付目标详情
+
+- `ListDeliveryTargets(ctx, filter) ([]WorkItemDeliveryTarget, *Pagination, error)`
+  - 获取工作项交付目标列表
+  - 参数：filter（包含工作项 ID、可选的状态）
+  - 返回：交付目标列表和分页信息
+
+- `DeleteDeliveryTarget(ctx, targetID) error`
+  - 删除工作项交付目标
+  - 参数：targetID（必填）
+
 ---
 
 ## 8. 版本历史
+
+### v0.6.0 (Phase 6)
+- 新增：WorkItem 领域完整接口（21 个）
+  - 基础操作：Create、Update、BatchUpdate、List、Get、Delete
+  - 属性与分类：ListTypes、ListStatuses、ListFields、ListPriorities、ListTags
+  - 标签管理：AddTag、RemoveTag
+  - 关联管理：ListLinkTypes、Link、ListLinks、Unlink
+  - 流程与交付目标：ListTransitions、CreateDeliveryTarget、UpdateDeliveryTarget、ListDeliveryTargets、DeleteDeliveryTarget
 
 ### v0.5.0 (Phase 5)
 - 新增：需求辅助接口（5 个）
