@@ -20,14 +20,16 @@ func main() {
 
 	projectID := os.Getenv("PINGCODE_PROJECT_ID")
 	// 创建客户端
-	client, err := sdk.NewClient(config)
+	var client *sdk.Client
+	client, err = sdk.NewClient(config)
 	if err != nil {
 		log.Fatalf("Failed to create client: %v", err)
 	}
 
 	ctx := context.Background()
 
-	fmt.Println("=== Sprint 管理示例 ===\n")
+	fmt.Println("=== Sprint 管理示例 ===")
+	fmt.Println()
 
 	// 1. 创建迭代分组
 	fmt.Println("1. 创建迭代分组...")
@@ -150,7 +152,8 @@ func main() {
 	if sprint != nil {
 		fmt.Println("\n6. 部分更新迭代...")
 		newStatus := "in_progress"
-		updatedSprint, err := client.Sprint().UpdatePartially(ctx, projectID, sprint.ID, sprintmodel.SprintUpdateInput{
+		var updatedSprint *sprintmodel.Sprint
+		updatedSprint, err = client.Sprint().UpdatePartially(ctx, projectID, sprint.ID, sprintmodel.SprintUpdateInput{
 			Status: &newStatus,
 		})
 		if err != nil {
